@@ -11,6 +11,7 @@ import android.widget.ScrollView;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -48,11 +49,12 @@ public class MainActivity extends AppCompatActivity {
                 final View item = inflater.inflate(R.layout.item, null, false);
                 linearLayout.addView(item);
 
-                item.setClickable(true);
-                item.setOnClickListener(new View.OnClickListener() {
+                ((ConstraintLayout) item).findViewById(R.id.remove_button).setOnLongClickListener(new View.OnLongClickListener() {
                     @Override
-                    public void onClick(View view) {
+                    public boolean onLongClick(View view) {
                         linearLayout.removeView(item);
+
+                        return false;
                     }
                 });
 

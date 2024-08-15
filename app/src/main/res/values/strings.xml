@@ -1,3 +1,10 @@
 <resources>
     <string name="app_name">Reservoir calibrations</string>
+    <string name="level">Рівень, см</string>
+    <string name="volume">Об\'єм, м3</string>
+    <string name="before">Попередній</string>
+    <string name="current">Поточний</string>
+    <string name="received">Прийнято</string>
+    <string name="add_new">Додати</string>
+    <string name="remove">видалити</string>
 </resources>
