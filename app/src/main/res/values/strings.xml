@@ -7,4 +7,5 @@
     <string name="received">Прийнято</string>
     <string name="add_new">Додати</string>
     <string name="remove">видалити</string>
+    <string name="calibrations">калібровка</string>
 </resources>

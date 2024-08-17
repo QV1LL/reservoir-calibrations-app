@@ -16,7 +16,6 @@
         app:layout_constraintTop_toTopOf="parent">
 
         <TableRow
-            android:layout_marginTop="20dp"
             android:background="@color/main"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -165,6 +164,7 @@
         </TableRow>
 
         <TableRow
+            android:layout_marginBottom="30dp"
             android:background="@color/main"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -178,6 +178,15 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 android:textSize="8sp"/>
+
+            <Button
+                android:id="@+id/calibrations_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/calibrations"
+                android:textSize="8sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
         </TableRow>
 
