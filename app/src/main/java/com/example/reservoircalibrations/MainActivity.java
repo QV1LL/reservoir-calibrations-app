@@ -1,22 +1,15 @@
 package com.example.reservoircalibrations;
 
 import android.os.Bundle;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
-import android.view.ViewParent;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.LinearLayout;
-import android.widget.ScrollView;
 import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -54,15 +47,15 @@ public class MainActivity extends AppCompatActivity {
 
         inflateButton = (Button) findViewById(R.id.inflate_button);
 
-        setupButtonClick();
+        setupAddButtonClick();
     }
 
 
-    private void setupButtonClick () {
+    private void setupAddButtonClick () {
         inflateButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                final View item = inflater.inflate(R.layout.item, null, false);
+                final View item = inflater.inflate(R.layout.reservoir, null, false);
                 linearLayout.addView(item);
                 inflatedItems.add(item);
                 reservoirs.add(new Reservoir());
@@ -87,6 +80,14 @@ public class MainActivity extends AppCompatActivity {
                         reservoirs.remove(inflatedItems.indexOf(item));
                         inflatedItems.remove(item);
 
+                        return false;
+                    }
+                });
+
+                item.findViewById(R.id.calibrations_button).setOnLongClickListener(new View.OnLongClickListener() {
+                    @Override
+                    public boolean onLongClick(View view) {
+                        setContentView(R.layout.activity_calibration);
                         return false;
                     }
                 });
