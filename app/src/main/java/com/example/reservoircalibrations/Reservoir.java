@@ -13,15 +13,16 @@ public class Reservoir {
 
     public double receivedVolume;
 
-    private Calibrations calibrations;
+    public Calibrations calibrations;
 
     public Reservoir() {
         this.name = _defaultName;
+        calibrations = new Calibrations(600);
     }
 
     public Reservoir(String name) {
         this.name = (name.isEmpty()) ? _defaultName : name;
 
-        calibrations = new Calibrations();
+        calibrations = new Calibrations(600);
     }
 }

@@ -1,7 +1,7 @@
 package com.example.reservoircalibrations;
 
+import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
@@ -87,12 +87,13 @@ public class MainActivity extends AppCompatActivity {
                 item.findViewById(R.id.calibrations_button).setOnLongClickListener(new View.OnLongClickListener() {
                     @Override
                     public boolean onLongClick(View view) {
-                        setContentView(R.layout.activity_calibration);
+                        int index = inflatedItems.indexOf(item);
+
+                        Intent intent = new Intent(MainActivity.this, reservoirs.get(index).calibrations.getClass());
+                        startActivity(intent);
                         return false;
                     }
                 });
-
-                for(Reservoir reservoir : reservoirs) Log.i("myTag", "Name: " + reservoir.name);
             }
         });
     }

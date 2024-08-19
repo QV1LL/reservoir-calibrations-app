@@ -19,16 +19,17 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
 
-            <EditText
+            <TextView
+                android:id="@+id/level"
                 android:gravity="center"
                 android:layout_weight="1"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                android:inputType="numberDecimal"/>
+                app:layout_constraintTop_toTopOf="parent"/>
 
             <EditText
+                android:id="@+id/volume"
                 android:gravity="center"
                 android:layout_weight="1"
                 android:layout_width="match_parent"
@@ -38,6 +39,7 @@
                 android:inputType="numberDecimal"/>
 
             <TextView
+                android:id="@+id/meter3per_mm"
                 android:gravity="center"
                 android:layout_weight="1"
                 android:layout_width="match_parent"
