@@ -1,3 +1,5 @@
+import com.google.gson.Gson
+
 plugins {
     alias(libs.plugins.android.application)
 }
@@ -35,11 +37,11 @@ android {
 }
 
 dependencies {
-
     implementation(libs.appcompat)
     implementation(libs.material)
     implementation(libs.activity)
     implementation(libs.constraintlayout)
+    implementation(files("libs\\gson-2.11.0.jar"))
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)

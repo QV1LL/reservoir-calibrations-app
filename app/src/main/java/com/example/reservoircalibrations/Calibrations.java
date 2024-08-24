@@ -1,5 +1,6 @@
 package com.example.reservoircalibrations;
 
+import android.content.SharedPreferences;
 import android.os.Bundle;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -9,11 +10,13 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 
 import com.example.reservoircalibrations.databinding.ActivityCalibrationBinding;
 
 import java.util.ArrayList;
+import com.google.gson.Gson;
 
 public class Calibrations extends AppCompatActivity {
 
@@ -28,20 +31,27 @@ public class Calibrations extends AppCompatActivity {
     private ArrayList<Float> _volume;
     private ArrayList<Float> _volumePerMM;
 
+    public static int count = 0;
+
     private int _size;
 
     public Calibrations () {
         _volume = new ArrayList<>();
         _volumePerMM = new ArrayList<>();
 
-        this._size = 600;
+        count++;
+        this._size = 10;
+
+        Log.i("myTag", "Count: " + count);
     }
 
     public Calibrations (int size) {
         _volume = new ArrayList<>();
         _volumePerMM = new ArrayList<>();
 
+        count++;
         this._size = size;
+        Log.i("myTag", "Count: " + count);
     }
 
     @Override
@@ -76,6 +86,25 @@ public class Calibrations extends AppCompatActivity {
         });
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        saveData();
+    }
+
+    private void saveData() {
+        SharedPreferences sharedPreferences = getSharedPreferences("calibrations", MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        Gson gson = new Gson();
+
+        String jsonObject = gson.toJson(this);
+        editor.putString("calibration" + count, jsonObject);
+
+        editor.commit();
+        editor.apply();
+    }
+
     private void deleteLastRow() {
         if (table.getChildCount() > 1) table.removeView(table.getChildAt(table.getChildCount() - 1));
     }
@@ -95,5 +124,14 @@ public class Calibrations extends AppCompatActivity {
 
     private void addOneRow() {
         addRow(table.getChildCount());
+    }
+
+    @Override
+    protected void finalize() throws Throwable {
+        try {
+            count--;
+        } finally {
+            super.finalize();
+        }
     }
 }

@@ -9,6 +9,7 @@
     <string name="remove">видалити</string>
     <string name="calibrations">калібровка</string>
     <string name="title_activity_calibration">calibration</string>
+    <string name="save">Зберегти</string>
     <string name="large_text">
         "Material is the metaphor.\n\n"
 
