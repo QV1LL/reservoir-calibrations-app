@@ -35,6 +35,9 @@ public class MainActivity extends AppCompatActivity {
     private ArrayList<View> inflatedItems;
     private ArrayList<Reservoir> reservoirs;
 
+    public static int inflatedItemsCount;
+    public static int currentItemIndex;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -56,7 +59,11 @@ public class MainActivity extends AppCompatActivity {
         loadData();
         setupAddButtonClick();
         setupSaveButton();
-//        setupAutoSave(findViewById(R.id.main));
+        setupAutoSave(findViewById(R.id.main));
+
+        inflatedItemsCount = inflatedItems.size();
+
+        debugCalibrations();
     }
 
     private void setupSaveButton() {
@@ -89,12 +96,10 @@ public class MainActivity extends AppCompatActivity {
                 ((EditText) child).addTextChangedListener(new TextWatcher() {
                     @Override
                     public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
                     }
 
                     @Override
                     public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
                     }
 
                     @Override
@@ -104,7 +109,13 @@ public class MainActivity extends AppCompatActivity {
                                     item.findViewById(R.id.reservoir_name),
                                     item.findViewById(R.id.before_level),
                                     item.findViewById(R.id.current_level));
+                        }
+                    }
+                });
 
+                child.setOnFocusChangeListener((v, hasFocus) -> {
+                    if (!hasFocus) {
+                        for (View item : inflatedItems) {
                             setupText(inflatedItems.indexOf(item),
                                     item.findViewById(R.id.reservoir_name),
                                     item.findViewById(R.id.before_level),
@@ -160,9 +171,9 @@ public class MainActivity extends AppCompatActivity {
                 item.findViewById(R.id.calibrations_button).setOnLongClickListener(new View.OnLongClickListener() {
                     @Override
                     public boolean onLongClick(View view) {
-                        int index = inflatedItems.indexOf(item);
+                        currentItemIndex = inflatedItems.indexOf(item);
 
-                        Intent intent = new Intent(MainActivity.this, Calibrations.class);
+                        Intent intent = new Intent(MainActivity.this, CalibrationsActivity.class);
                         startActivity(intent);
                         return false;
                     }
@@ -176,8 +187,6 @@ public class MainActivity extends AppCompatActivity {
                                 TextView name,
                                 TextView beforeLevel,
                                 TextView currentLevel) {
-        Log.i("myTag", "Setup reservoir: " + name.getText().toString());
-
         if(!name.getText().toString().isEmpty()) reservoirs.get(index).name = name.getText().toString();
 
         reservoirs.get(index).beforeLevel = Float.parseFloat((beforeLevel.getText().toString().isEmpty()) ? "0f" : beforeLevel.getText().toString());
@@ -220,6 +229,29 @@ public class MainActivity extends AppCompatActivity {
         editor.apply();
     }
 
+    private void debugCalibrations() {
+        SharedPreferences sharedPreferences = getSharedPreferences("calibrations", MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        Gson gson = new Gson();
+
+        try {
+            for (int i = 0; i < inflatedItems.size(); i++) {
+                Calibration calibration = gson.fromJson(sharedPreferences.getString("calibration" + String.valueOf(i + 1), ""), Calibration.class);
+
+                Log.i("myTag", "Start!");
+
+                for (float value : calibration.volume) {
+                    Log.i("myTag", "Volume per mm: " + value);
+                }
+
+                Log.i("myTag", "end!");
+            }
+        }
+        catch (Exception e) {
+            Log.i("myTag", "calibration is not loaded!");
+        }
+    }
+
     private void loadData() {
 
         SharedPreferences sharedPreferences = getSharedPreferences("dataSave", MODE_PRIVATE);
@@ -259,7 +291,7 @@ public class MainActivity extends AppCompatActivity {
                 public boolean onLongClick(View view) {
                     int index = inflatedItems.indexOf(item);
 
-                    Intent intent = new Intent(MainActivity.this, Calibrations.class);
+                    Intent intent = new Intent(MainActivity.this, CalibrationsActivity.class);
                     startActivity(intent);
                     return false;
                 }
