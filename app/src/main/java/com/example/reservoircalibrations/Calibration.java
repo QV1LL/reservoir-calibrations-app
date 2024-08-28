@@ -24,4 +24,16 @@ public class Calibration {
 
         this.size = size;
     }
+
+    public float getVolume(float level) {
+        int wholeNumberPart = (int) level;
+        float floatNumberPart = level - wholeNumberPart;
+
+        try {
+            return volume.get(wholeNumberPart - 1) + (volumePerMM.get(wholeNumberPart + 1) * floatNumberPart * 10);
+        }
+        catch (Exception e) {
+            return 0f;
+        }
+    }
 }

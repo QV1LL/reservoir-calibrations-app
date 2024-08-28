@@ -87,7 +87,8 @@ public class CalibrationsActivity extends AppCompatActivity {
         Gson gson = new Gson();
 
         try {
-            Calibration calibrationObject = gson.fromJson(sharedPreferences.getString("calibration" + (MainActivity.currentItemIndex + 1), ""), Calibration.class);
+            Log.i(MainActivity.TAG, "Trying to get calibration" + MainActivity.currentItemIndex + "...");
+            Calibration calibrationObject = gson.fromJson(sharedPreferences.getString("calibration" + MainActivity.currentItemIndex, ""), Calibration.class);
 
             calibration = calibrationObject;
 
@@ -101,9 +102,11 @@ public class CalibrationsActivity extends AppCompatActivity {
                 ((TextView) parentChild.findViewById(R.id.volume)).setText(String.format(Locale.ROOT, "%.3f" ,calibration.volume.get(i - 1)));
                 ((TextView) parentChild.findViewById(R.id.meter3per_mm)).setText(String.format(Locale.ROOT, "%.4f", calibration.volumePerMM.get(i - 1)));
             }
+
+            Log.i(MainActivity.TAG, "Successfully execute data!");
         }
         catch (Exception e) {
-            Log.i("myTag", "Exception:  " + e);
+            Log.i(MainActivity.TAG, "Exception:  " + e);
         }
     }
 
@@ -113,9 +116,8 @@ public class CalibrationsActivity extends AppCompatActivity {
         Gson gson = new Gson();
 
         String jsonObject = gson.toJson(calibration);
-        editor.putString("calibration" + MainActivity.inflatedItemsCount, jsonObject);
+        editor.putString("calibration" + MainActivity.currentItemIndex, jsonObject);
 
-        editor.commit();
         editor.apply();
     }
 

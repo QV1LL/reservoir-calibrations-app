@@ -2,6 +2,7 @@ package com.example.reservoircalibrations;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.nfc.Tag;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -35,6 +36,8 @@ public class MainActivity extends AppCompatActivity {
     private ArrayList<View> inflatedItems;
     private ArrayList<Reservoir> reservoirs;
 
+    public static final String TAG = "myTechnicalTag";
+
     public static int inflatedItemsCount;
     public static int currentItemIndex;
 
@@ -63,13 +66,15 @@ public class MainActivity extends AppCompatActivity {
 
         inflatedItemsCount = inflatedItems.size();
 
-        debugCalibrations();
+        Log.i(TAG, "Loaded items count: " + inflatedItemsCount);
     }
 
     private void setupSaveButton() {
         findViewById(R.id.update_button).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                Log.i(TAG, "Saving reservoirs...");
+
                 for (View item : inflatedItems) {
                     setupReservoir(inflatedItems.indexOf(item),
                             item.findViewById(R.id.reservoir_name),
@@ -110,6 +115,8 @@ public class MainActivity extends AppCompatActivity {
                                     item.findViewById(R.id.before_level),
                                     item.findViewById(R.id.current_level));
                         }
+
+                        Log.i(TAG, "Setup reservoir...");
                     }
                 });
 
@@ -124,6 +131,8 @@ public class MainActivity extends AppCompatActivity {
                                     item.findViewById(R.id.current_volume),
                                     item.findViewById(R.id.received_volume));
                         }
+
+                        Log.i(TAG, "Setup text...");
                     }
                 });
             }
@@ -160,9 +169,26 @@ public class MainActivity extends AppCompatActivity {
                 item.findViewById(R.id.remove_button).setOnLongClickListener(new View.OnLongClickListener() {
                     @Override
                     public boolean onLongClick(View view) {
+                        currentItemIndex = inflatedItems.indexOf(item);
+
+                        Log.i(TAG, "Removing item by index: " + currentItemIndex);
+
                         linearLayout.removeView(item);
-                        reservoirs.remove(inflatedItems.indexOf(item));
+                        reservoirs.remove(currentItemIndex);
                         inflatedItems.remove(item);
+                        inflatedItemsCount = inflatedItems.size();
+
+                        SharedPreferences sharedPreferences = getSharedPreferences("calibrations", MODE_PRIVATE);
+                        SharedPreferences.Editor editor = sharedPreferences.edit();
+
+                        if (sharedPreferences.contains("calibration" + currentItemIndex)) {
+                            editor.remove("calibration" + currentItemIndex);
+                            Log.i(TAG, "Calibration removed!");
+                        } else {
+                            Log.i(TAG, "Calibration with that id does not exist");
+                        }
+
+                        editor.apply();
 
                         return false;
                     }
@@ -173,11 +199,15 @@ public class MainActivity extends AppCompatActivity {
                     public boolean onLongClick(View view) {
                         currentItemIndex = inflatedItems.indexOf(item);
 
+                        Log.i(TAG, "Setup calibration by reservoir index: " + currentItemIndex);
+
                         Intent intent = new Intent(MainActivity.this, CalibrationsActivity.class);
                         startActivity(intent);
                         return false;
                     }
                 });
+
+                setupAutoSave(findViewById(R.id.main));
             }
         });
     }
@@ -191,6 +221,16 @@ public class MainActivity extends AppCompatActivity {
 
         reservoirs.get(index).beforeLevel = Float.parseFloat((beforeLevel.getText().toString().isEmpty()) ? "0f" : beforeLevel.getText().toString());
         reservoirs.get(index).currentLevel = Float.parseFloat((currentLevel.getText().toString().isEmpty()) ? "0f" : currentLevel.getText().toString());
+
+        SharedPreferences sharedPreferences = getSharedPreferences("calibrations", MODE_PRIVATE);
+        Gson gson = new Gson();
+
+        Calibration calibration = gson.fromJson(sharedPreferences.getString("calibration" + index, ""), Calibration.class);
+
+        reservoirs.get(index).beforeVolume = calibration.getVolume(reservoirs.get(index).beforeLevel);
+        reservoirs.get(index).currentVolume = calibration.getVolume(reservoirs.get(index).currentLevel);
+
+        reservoirs.get(index).receivedVolume = reservoirs.get(index).currentVolume - reservoirs.get(index).beforeVolume;
     }
 
 
@@ -225,37 +265,12 @@ public class MainActivity extends AppCompatActivity {
             editor.putString("reservoir" + i, jsonObject);
         }
 
-        editor.commit();
         editor.apply();
-    }
-
-    private void debugCalibrations() {
-        SharedPreferences sharedPreferences = getSharedPreferences("calibrations", MODE_PRIVATE);
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        Gson gson = new Gson();
-
-        try {
-            for (int i = 0; i < inflatedItems.size(); i++) {
-                Calibration calibration = gson.fromJson(sharedPreferences.getString("calibration" + String.valueOf(i + 1), ""), Calibration.class);
-
-                Log.i("myTag", "Start!");
-
-                for (float value : calibration.volume) {
-                    Log.i("myTag", "Volume per mm: " + value);
-                }
-
-                Log.i("myTag", "end!");
-            }
-        }
-        catch (Exception e) {
-            Log.i("myTag", "calibration is not loaded!");
-        }
     }
 
     private void loadData() {
 
         SharedPreferences sharedPreferences = getSharedPreferences("dataSave", MODE_PRIVATE);
-        SharedPreferences.Editor editor = sharedPreferences.edit();
         Gson gson = new Gson();
 
         int i = 0;
@@ -278,9 +293,25 @@ public class MainActivity extends AppCompatActivity {
             item.findViewById(R.id.remove_button).setOnLongClickListener(new View.OnLongClickListener() {
                 @Override
                 public boolean onLongClick(View view) {
+                    currentItemIndex = inflatedItems.indexOf(item);
+
                     linearLayout.removeView(item);
-                    reservoirs.remove(inflatedItems.indexOf(item));
+                    reservoirs.remove(currentItemIndex);
                     inflatedItems.remove(item);
+
+                    SharedPreferences sharedPreferences = getSharedPreferences("calibrations", MODE_PRIVATE);
+                    SharedPreferences.Editor editor = sharedPreferences.edit();
+
+                    Log.i(TAG, "Removing calibrations" + currentItemIndex);
+
+                    if (sharedPreferences.contains("calibration" + currentItemIndex)) {
+                        editor.remove("calibration" + currentItemIndex);
+                        Log.i(TAG, "Calibration removed!");
+                    } else {
+                        Log.i(TAG, "Calibration" + currentItemIndex + " does not exist");
+                    }
+
+                    editor.apply();
 
                     return false;
                 }
@@ -289,7 +320,9 @@ public class MainActivity extends AppCompatActivity {
             item.findViewById(R.id.calibrations_button).setOnLongClickListener(new View.OnLongClickListener() {
                 @Override
                 public boolean onLongClick(View view) {
-                    int index = inflatedItems.indexOf(item);
+                    currentItemIndex = inflatedItems.indexOf(item);
+
+                    Log.i(TAG, "Setup calibration by reservoir index: " + currentItemIndex);
 
                     Intent intent = new Intent(MainActivity.this, CalibrationsActivity.class);
                     startActivity(intent);
