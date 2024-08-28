@@ -227,8 +227,10 @@ public class MainActivity extends AppCompatActivity {
 
         Calibration calibration = gson.fromJson(sharedPreferences.getString("calibration" + index, ""), Calibration.class);
 
-        reservoirs.get(index).beforeVolume = calibration.getVolume(reservoirs.get(index).beforeLevel);
-        reservoirs.get(index).currentVolume = calibration.getVolume(reservoirs.get(index).currentLevel);
+        if (calibration != null) {
+            reservoirs.get(index).beforeVolume = calibration.getVolume(reservoirs.get(index).beforeLevel);
+            reservoirs.get(index).currentVolume = calibration.getVolume(reservoirs.get(index).currentLevel);
+        }
 
         reservoirs.get(index).receivedVolume = reservoirs.get(index).currentVolume - reservoirs.get(index).beforeVolume;
     }
