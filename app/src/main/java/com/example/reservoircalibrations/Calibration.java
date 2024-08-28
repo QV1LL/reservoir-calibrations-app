@@ -30,7 +30,7 @@ public class Calibration {
         float floatNumberPart = level - wholeNumberPart;
 
         try {
-            return volume.get(wholeNumberPart - 1) + (volumePerMM.get(wholeNumberPart + 1) * floatNumberPart * 10);
+            return volume.get(wholeNumberPart) + (volumePerMM.get(wholeNumberPart) * floatNumberPart * 10);
         }
         catch (Exception e) {
             return 0f;
