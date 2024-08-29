@@ -33,6 +33,8 @@ public class CalibrationsActivity extends AppCompatActivity {
 
     private Calibration calibration;
 
+    private boolean isLoaded = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -71,8 +73,6 @@ public class CalibrationsActivity extends AppCompatActivity {
                 deleteLastRow();
             }
         });
-
-        setupAutoSave(table);
     }
 
     @Override
@@ -96,8 +96,12 @@ public class CalibrationsActivity extends AppCompatActivity {
                 addRow(i);
             }
 
+            Log.i(MainActivity.TAG, "Loading...");
+
             for (int i = 1; i < table.getChildCount(); i++) {
                 ViewGroup parentChild = (ViewGroup) table.getChildAt(i);
+
+                Log.i(MainActivity.TAG, "Volume, volume per mm: " + calibration.volume.get(i - 1) + ", " + calibration.volumePerMM.get(i - 1));
 
                 ((TextView) parentChild.findViewById(R.id.volume)).setText(String.format(Locale.ROOT, "%.3f" ,calibration.volume.get(i - 1)));
                 ((TextView) parentChild.findViewById(R.id.meter3per_mm)).setText(String.format(Locale.ROOT, "%.4f", calibration.volumePerMM.get(i - 1)));
@@ -108,6 +112,9 @@ public class CalibrationsActivity extends AppCompatActivity {
         catch (Exception e) {
             Log.i(MainActivity.TAG, "Exception:  " + e);
         }
+
+        isLoaded = true;
+        setupAutoSave(table);
     }
 
     private void saveData() {
@@ -119,10 +126,17 @@ public class CalibrationsActivity extends AppCompatActivity {
         editor.putString("calibration" + MainActivity.currentItemIndex, jsonObject);
 
         editor.apply();
+
+        Log.i(MainActivity.TAG, "calibration" + MainActivity.currentItemIndex + " saved!");
     }
 
     private void deleteLastRow() {
-        if (table.getChildCount() > 1) table.removeView(table.getChildAt(table.getChildCount() - 1));
+        if (table.getChildCount() > 1) {
+            table.removeView(table.getChildAt(table.getChildCount() - 1));
+            calibration.size--;
+
+            Log.i(MainActivity.TAG, "Delete last row, size: " + calibration.size);
+        }
     }
 
     private void addRow(int level) {
@@ -134,10 +148,15 @@ public class CalibrationsActivity extends AppCompatActivity {
         float volume = Float.parseFloat((((TextView) inflatedItem.findViewById(R.id.volume)).getText().toString().isEmpty()) ? "0f" : ((TextView) inflatedItem.findViewById(R.id.volume)).getText().toString());
         calibration.volume.add(volume);
         calibration.volumePerMM.add(0f);
+
+        setupAutoSave(table);
     }
 
     private void addOneRow() {
-        addRow(table.getChildCount());
+        addRow(table.getChildCount() - 1);
+        calibration.size++;
+
+        Log.i(MainActivity.TAG, "Add one row, size: " + calibration.size);
     }
 
     private void setupAutoSave(ViewGroup parent) {
@@ -156,26 +175,37 @@ public class CalibrationsActivity extends AppCompatActivity {
 
                     @Override
                     public void afterTextChanged(Editable editable) {
-                        for (int i = 1; i < table.getChildCount(); i++) {
-                            ViewGroup parentChild = (ViewGroup) table.getChildAt(i);
+                        if (isLoaded) {
+                            for (int i = 1; i < table.getChildCount(); i++) {
+                                ViewGroup parentChild = (ViewGroup) table.getChildAt(i);
 
-                            calibration.volume.set(i - 1, Float.valueOf((((TextView) parentChild.findViewById(R.id.volume)).getText().toString().isEmpty()) ? "0f" : ((TextView) parentChild.findViewById(R.id.volume)).getText().toString()));
+                                calibration.volume.set(i - 1, Float.valueOf((((TextView) parentChild.findViewById(R.id.volume)).getText().toString().isEmpty()) ? "0f" : String.format(Locale.ROOT, "%.3f", Float.parseFloat(((TextView) parentChild.findViewById(R.id.volume)).getText().toString()))));
 
-                            if (i < calibration.volume.size())
-                                calibration.volumePerMM.set(i - 1, (calibration.volume.get(i) - calibration.volume.get(i - 1)) / 10);
+                                if (i < calibration.volume.size())
+                                    calibration.volumePerMM.set(i - 1, Float.parseFloat(String.format(Locale.ROOT, "%.4f", (calibration.volume.get(i) - calibration.volume.get(i - 1)) / 10)));
+                            }
+
+                            Log.i(MainActivity.TAG, "Saved calibration");
                         }
                     }
                 });
 
                 child.setOnFocusChangeListener((v, hasFocus) -> {
-                    if (!hasFocus) {
+                    if (!hasFocus)
+                    {
+                        ViewGroup childParent = getChildParent(child, R.id.table_element);
+                        Log.i(MainActivity.TAG, "Index: " + table.indexOfChild(childParent));
+                        ((TextView) childParent.findViewById(R.id.volume)).setText(String.format(Locale.ROOT, "%.3f" ,calibration.volume.get(table.indexOfChild(childParent) - 1)));
+
                         for (int j = 1; j < table.getChildCount(); j++) {
                             ViewGroup parentChild = (ViewGroup) table.getChildAt(j);
-
-                            ((TextView) parentChild.findViewById(R.id.volume)).setText(String.format(Locale.ROOT, "%.3f" ,calibration.volume.get(j - 1)));
                             ((TextView) parentChild.findViewById(R.id.meter3per_mm)).setText(String.format(Locale.ROOT, "%.4f", calibration.volumePerMM.get(j - 1)));
                         }
+
+                        Log.i(MainActivity.TAG, "Volume: " + calibration.volume.get(table.indexOfChild(childParent) - 1) + ", volume per mm: " + calibration.volumePerMM.get(table.indexOfChild(childParent) - 1));
+                        Log.i(MainActivity.TAG, "Setup text");
                     }
+
                 });
             }
 
@@ -183,5 +213,24 @@ public class CalibrationsActivity extends AppCompatActivity {
                 setupAutoSave((ViewGroup) child);
             }
         }
+    }
+
+    private ViewGroup getChildParent(View v, int parentId) {
+        ViewGroup parent;
+
+        try {
+            parent = (ViewGroup) v.getParent();
+
+            Log.i(MainActivity.TAG, "Id of parent: " + parent.getId());
+        }
+        catch (Exception e) {
+            Log.i(MainActivity.TAG, "Cannot get parent of view");
+            return null;
+        }
+
+        if (parent.getId() == parentId)
+            return parent;
+
+        return getChildParent(parent, parentId);
     }
 }

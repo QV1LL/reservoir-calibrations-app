@@ -219,8 +219,8 @@ public class MainActivity extends AppCompatActivity {
                                 TextView currentLevel) {
         if(!name.getText().toString().isEmpty()) reservoirs.get(index).name = name.getText().toString();
 
-        reservoirs.get(index).beforeLevel = Float.parseFloat((beforeLevel.getText().toString().isEmpty()) ? "0f" : beforeLevel.getText().toString());
-        reservoirs.get(index).currentLevel = Float.parseFloat((currentLevel.getText().toString().isEmpty()) ? "0f" : currentLevel.getText().toString());
+        reservoirs.get(index).beforeLevel = Float.parseFloat((beforeLevel.getText().toString().isEmpty()) ? "0f" : String.format(Locale.ROOT, "%.3f", Float.parseFloat(beforeLevel.getText().toString())));
+        reservoirs.get(index).currentLevel = Float.parseFloat((currentLevel.getText().toString().isEmpty()) ? "0f" : String.format(Locale.ROOT, "%.3f", Float.parseFloat(currentLevel.getText().toString())));
 
         SharedPreferences sharedPreferences = getSharedPreferences("calibrations", MODE_PRIVATE);
         Gson gson = new Gson();
